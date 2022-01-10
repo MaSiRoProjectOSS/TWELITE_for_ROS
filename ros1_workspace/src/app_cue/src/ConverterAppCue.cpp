@@ -8,7 +8,9 @@
  *
  */
 
-#include "AppCue.h"
+#include "ConverterAppCue.h"
+
+#include "../include/twelite_app_cue/config_twelite_app_cue.h"
 
 // ==================================================== //
 #define CONVERTERAPPCUE_LOG     0
@@ -49,8 +51,9 @@ AppCue::~AppCue() {}
  */
 void AppCue::Run(ros::NodeHandle *nh)
 {
+    this->set_device_name(TWELITE::app_cue::CONFIG_TWELITE_APP_DEVICE_NAME);
     if (NULL == this->publisher) {
-        this->publisher = nh->advertise<twelite_interfaces::TweliteAppCueMsg>(this->topic_name, 500);
+        this->publisher = nh->advertise<twelite_interfaces::TweliteAppCueMsg>(TWELITE::app_cue::CONFIG_TWELITE_APP_CUE_TOPIC_NAME, TWELITE::app_cue::CONFIG_TWELITE_APP_CUE_QOS);
     }
     if (NULL == this->timer) {
         this->timer = nh->createTimer(ros::Duration(0.1), std::bind(&AppCue::timer_callback, this));

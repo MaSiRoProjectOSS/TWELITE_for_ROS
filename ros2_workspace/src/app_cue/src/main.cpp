@@ -10,6 +10,7 @@
 
 #include "TWELITE_app_cue.h"
 #include "rclcpp/rclcpp.hpp"
+#include "twelite_app_cue/config_twelite_app_cue.h"
 
 // ==================================================== //
 #define TWELITE_APP_CUE_MAIN_DEBUG 1
@@ -24,7 +25,7 @@
 
 int main(int argc, char *argv[])
 {
-    log_printf(" === TWELITE_app_cue : start ===\n");
+    log_printf(" === TWELITE_app_cue : start [device:%s]===\n", TWELITE::app_cue::CONFIG_TWELITE_APP_DEVICE_NAME.c_str());
     rclcpp::init(argc, argv);
     rclcpp::spin(std::make_shared<TWELITE_app_cue>());
     rclcpp::shutdown();
