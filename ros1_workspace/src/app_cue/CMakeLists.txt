@@ -145,7 +145,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node
   src/app_cue_node.cpp
-  src/AppCue.cpp
+  src/ConverterAppCue.cpp
   src/SerialMonitor.cpp
 )
 

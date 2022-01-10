@@ -34,7 +34,6 @@ private:
     /* **************************************************** */
     void DebugPrint(twelite_interfaces::TweliteAppCueMsg msg);
 
-    const std::string topic_name = "TWELITE/app_cue";
     ros::Publisher publisher;
     ros::Timer timer;
 };

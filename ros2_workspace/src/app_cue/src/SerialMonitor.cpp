@@ -63,12 +63,12 @@ std::string SerialMonitor::get_device_name()
 // デバイス接続 API
 //////////////////////////////////////////////////////////
 #pragma region CONNECT_API
-void SerialMonitor::device_open(void)
+int SerialMonitor::device_open(void)
 {
+    int result = -1;
     if (-1 == this->dev_fd) {
         this->dev_fd = open(this->dev_name.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
         if (this->dev_fd >= 0) {
-            this->dev_connected = true;
             fcntl(this->dev_fd, F_SETFL, 0);
             //load configuration
             struct termios conf_tio;
@@ -91,10 +91,14 @@ void SerialMonitor::device_open(void)
                        this->dev_bits,
                        this->textParity(this->dev_parity).c_str(),
                        this->dev_stop_bits);
+
+            this->dev_connected = true;
+            result              = 0;
         } else {
             this->dev_connected = false;
         }
     }
+    return result;
 }
 
 bool SerialMonitor::is_connected(void)
@@ -171,8 +175,8 @@ bool SerialMonitor::device_read(std::string *outdata, bool *one_sentence)
                     if (0 != read_size) {
                         refill[read_size++] = '\n';
                         refill[read_size]   = '\0';
-                        *outdata = refill;
-                        result   = true;
+                        *outdata            = refill;
+                        result              = true;
                     }
                     if (false == *one_sentence) {
                         flag_repeat = true;

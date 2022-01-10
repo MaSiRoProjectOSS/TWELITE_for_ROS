@@ -55,9 +55,9 @@ void TWELITE_app_cue::timer_callback()
         if (0 <= this->timeout_count) {
             this->timeout_count = this->TIMEOUT_COUNTER;
             this->monitor.device_close();
-            this->monitor.device_open();
-            RCLCPP_INFO(this->get_logger(), "device open");
-
+            if (-1 != this->monitor.device_open()) {
+                RCLCPP_INFO(this->get_logger(), "device open[device:%s]", TWELITE::app_cue::CONFIG_TWELITE_APP_DEVICE_NAME.c_str());
+            }
         } else {
             this->timeout_count--;
             RCLCPP_INFO(this->get_logger(), "device missing");
