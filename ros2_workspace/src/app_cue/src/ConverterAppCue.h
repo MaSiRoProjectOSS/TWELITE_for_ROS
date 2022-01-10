@@ -34,6 +34,5 @@ private:
     // debug
     /* **************************************************** */
     void DebugPrint(twelite_interfaces::msg::TweliteAppCueMsg msg);
-    void GetWakeupFactorName(int value0, int value1, int value2);
 };
 #endif

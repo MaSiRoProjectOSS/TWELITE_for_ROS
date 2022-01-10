@@ -11,8 +11,8 @@
 #include "ConverterAppCue.h"
 
 // ==================================================== //
-#define CONVERTERAPPCUE_LOG     1
-#define CONVERTERAPPCUE_DEBUG   1
+#define CONVERTERAPPCUE_LOG     0
+#define CONVERTERAPPCUE_DEBUG   0
 #define CONVERTERAPPCUE_VERBOSE 0
 /* **************************************************** */
 #include <cstdio>
@@ -96,7 +96,7 @@ int ConverterAppCue::convert_sensor_PAL(char *data, int start_index, int size, t
         int sensor_num = data[index++];
         verbose_printf("==== sensor_num[%d]\n", sensor_num);
         for (int i = 0; i < sensor_num; i++) {
-            //int  __Type     = None;  // データの型を入れる
+            // int  __Type     = None;  // データの型を入れる
             int __ErrCode  = 0;
             int __DataType = data[index++]; // データのタイプを入れる
             int __SensorID = data[index++]; // センサのIDを入れる
@@ -155,9 +155,9 @@ int ConverterAppCue::convert_sensor_PAL(char *data, int start_index, int size, t
                     accel_z = this->byte_to_int((data[index + 4]), (data[index + 5])) / 1000.0;
                     verbose_printf("      %5.2f, %5.2f, %5.2f\n", accel_x, accel_y, accel_z);
 
-                    msg->accel.linear.x = (msg->accel.linear.x + accel_x) / 2.0;
-                    msg->accel.linear.y = (msg->accel.linear.y + accel_y) / 2.0;
-                    msg->accel.linear.z = (msg->accel.linear.z + accel_z) / 2.0;
+                    msg->accel.x = (msg->accel.x + accel_x) / 2.0;
+                    msg->accel.y = (msg->accel.y + accel_y) / 2.0;
+                    msg->accel.z = (msg->accel.z + accel_z) / 2.0;
 
                     if (false == flag_sampling) {
                         flag_sampling = true;
@@ -191,7 +191,7 @@ int ConverterAppCue::convert_sensor_PAL(char *data, int start_index, int size, t
                         msg->power.data = ((data[index] << 8) + (data[index + 1]));
                     } else if (0x00 == __ExByte) {
                         debug_printf(" ==== %s\n", "ADC");
-                        //msg->adc0.data = ((data[index] << 8) + (data[index + 1]));
+                        // msg->adc0.data = ((data[index] << 8) + (data[index + 1]));
                     } else {
                         verbose_printf(" ==== %s%d\n", "ADC", __ExByte);
                         msg->adc.data = ((data[index] << 8) + (data[index + 1]));
@@ -207,10 +207,9 @@ int ConverterAppCue::convert_sensor_PAL(char *data, int start_index, int size, t
                     break;
                 case 0x34:
                     debug_printf(" ==== %s\n", "WakeupFactor");
-#if CONVERTERAPPCUE_DEBUG
-                    this->GetWakeupFactorName(data[index], data[index + 1], data[index + 2]);
-#endif
-                    // TODO : add message data
+                    msg->packet_id.data     = data[index + 0];
+                    msg->wakeup_factor.data = data[index + 1];
+                    msg->wakeup_event.data  = data[index + 2];
                     break;
                 default:
                     debug_printf(" ==== %s\n", "unknow");
@@ -235,6 +234,7 @@ twelite_interfaces::msg::TweliteAppCueMsg ConverterAppCue::Convert(const char *d
 {
     twelite_interfaces::msg::TweliteAppCueMsg msg;
     msg.header.set__stamp(rclcpp::Clock().now());
+    msg.header.set__frame_id("app_cue");
 
     int refill_size = 0;
     char temp[0x0FFF];
@@ -288,10 +288,10 @@ void ConverterAppCue::DebugPrint(twelite_interfaces::msg::TweliteAppCueMsg msg)
     log_printf("EndDevicesID : %08X\n", msg.end_devices_id.data);
     switch (msg.routers_id.data) {
         case 0x80000000u:
-            log_printf("RouterSID    : %s\n", "No Relay");
+            log_printf("RoutersID    : %s\n", "No Relay");
             break;
         default:
-            log_printf("RouterSID    : %08X\n", msg.routers_id.data);
+            log_printf("RoutersID    : %08X\n", msg.routers_id.data);
             break;
     }
     switch (msg.sensor.data) {
@@ -420,65 +420,57 @@ void ConverterAppCue::DebugPrint(twelite_interfaces::msg::TweliteAppCueMsg msg)
             log_printf("Magnet       : %s\n", "unknow");
             break;
     }
+    log_printf("WakeupFactor\n");
+    log_printf("   packet id : %d\n", msg.packet_id.data);
+    switch (msg.wakeup_factor.data) {
+        case msg.TWELITE_WAKEUPFACTOR_SENSOR_MAGNET:
+            log_printf("   factor    : %s\n", "Magnet");
+            break;
+        case msg.TWELITE_WAKEUPFACTOR_SENSOR_TEMPERATURE:
+            log_printf("   factor    : %s\n", "Temperature");
+            break;
+        case msg.TWELITE_WAKEUPFACTOR_SENSOR_HUMIDITY:
+            log_printf("   factor    : %s\n", "Humidity");
+            break;
+        case msg.TWELITE_WAKEUPFACTOR_SENSOR_ILLUMINANCE:
+            log_printf("   factor    : %s\n", "Illuminance");
+            break;
+        case msg.TWELITE_WAKEUPFACTOR_SENSOR_ACCELERATION:
+            log_printf("   factor    : %s\n", "Acceleration");
+            break;
+        case msg.TWELITE_WAKEUPFACTOR_SENSOR_DIO:
+            log_printf("   factor    : %s\n", "DIO");
+            break;
+        case msg.TWELITE_WAKEUPFACTOR_SENSOR_TIMER:
+            log_printf("   factor    : %s\n", "Timer");
+            break;
+        default:
+            log_printf("   factor    : %s\n", "unknow");
+            break;
+    }
+    switch (msg.wakeup_event.data) {
+        case msg.TWELITE_WAKEUPFACTOR_EVENT_OCCURRED_EVENT:
+            log_printf("   event     : %s\n", "Occurred_Event");
+            break;
+        case msg.TWELITE_WAKEUPFACTOR_EVENT_CHANGED_VALUE:
+            log_printf("   event     : %s\n", "Changed_Value");
+            break;
+        case msg.TWELITE_WAKEUPFACTOR_EVENT_UPPER_THEN_THRESHOLD:
+            log_printf("   event     : %s\n", "Upper_then_Threshold");
+            break;
+        case msg.TWELITE_WAKEUPFACTOR_EVENT_LOWER_THEN_THRESHOLD:
+            log_printf("   event     : %s\n", "Lower_Then_Threshold");
+            break;
+        case msg.TWELITE_WAKEUPFACTOR_EVENT_WITHIN_THRESHOLD:
+            log_printf("   event     : %s\n", "Within_Threshold");
+            break;
+        default:
+            log_printf("   event     : %s\n", "unknow");
+            break;
+    }
     log_printf("Accel\n");
-    log_printf("    X        : %5.2f [G]\n", msg.accel.linear.x);
-    log_printf("    Y        : %5.2f [G]\n", msg.accel.linear.y);
-    log_printf("    Z        : %5.2f [G]\n", msg.accel.linear.z);
+    log_printf("    X        : %5.2f [G]\n", msg.accel.x);
+    log_printf("    Y        : %5.2f [G]\n", msg.accel.y);
+    log_printf("    Z        : %5.2f [G]\n", msg.accel.z);
     log_printf("    Sampling : %d [Hz]\n", msg.accel_sampling.data);
-}
-void ConverterAppCue::GetWakeupFactorName(int value0, int value1, int value2)
-{
-    std::string text0 = ""; // 'PacketID_%d' value0
-    std::string text1;
-    std::string text2;
-    switch (value1) {
-        case 0x00:
-            text1 = "Magnet";
-            break;
-        case 0x01:
-            text1 = "Temperature";
-            break;
-        case 0x02:
-            text1 = "Humidity";
-            break;
-        case 0x03:
-            text1 = "Illuminance";
-            break;
-        case 0x04:
-            text1 = "Acceleration";
-            break;
-        case 0x31:
-            text1 = "DIO";
-            break;
-        case 0x35:
-            text1 = "Timer";
-            break;
-        default:
-            text1 = "unknow";
-            break;
-    }
-    switch (value2) {
-        case 0:
-            text2 = "Occurred_Event";
-            break;
-        case 1:
-            text2 = "Changed_Value";
-            break;
-        case 2:
-            text2 = "Upper_then_Threshold";
-            break;
-        case 3:
-            text2 = "Lower_Then_Threshold";
-            break;
-        case 4:
-            text2 = "Within_Threshold";
-            break;
-        default:
-            text2 = "unknow";
-            break;
-    }
-    debug_printf("WakeupFactor\n");
-    debug_printf("  PacketID_%d\n", value0);
-    debug_printf("  %s\n", text1.c_str());
-    debug_printf("  %s\n", text2.c_str());
 }

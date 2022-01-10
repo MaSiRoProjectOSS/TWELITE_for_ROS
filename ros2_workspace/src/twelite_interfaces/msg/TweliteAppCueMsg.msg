@@ -46,6 +46,22 @@ uint8 TWELITE_SENSOR_ADXL362         = 	98
 uint8 TWELITE_SENSOR_PAL             = 	128
 uint8 TWELITE_SENSOR_MULTISENSOR     = 	209
 uint8 TWELITE_SENSOR_BUTTON          = 	254
+####################################################
+# Wake-up Factor
+####################################################
+uint8 TWELITE_WAKEUPFACTOR_SENSOR_MAGNET            = 0
+uint8 TWELITE_WAKEUPFACTOR_SENSOR_TEMPERATURE       = 1
+uint8 TWELITE_WAKEUPFACTOR_SENSOR_HUMIDITY          = 2
+uint8 TWELITE_WAKEUPFACTOR_SENSOR_ILLUMINANCE       = 3
+uint8 TWELITE_WAKEUPFACTOR_SENSOR_ACCELERATION      = 4
+uint8 TWELITE_WAKEUPFACTOR_SENSOR_DIO               = 49
+uint8 TWELITE_WAKEUPFACTOR_SENSOR_TIMER             = 53
+
+uint8 TWELITE_WAKEUPFACTOR_EVENT_OCCURRED_EVENT         = 0
+uint8 TWELITE_WAKEUPFACTOR_EVENT_CHANGED_VALUE          = 1
+uint8 TWELITE_WAKEUPFACTOR_EVENT_UPPER_THEN_THRESHOLD   = 2
+uint8 TWELITE_WAKEUPFACTOR_EVENT_LOWER_THEN_THRESHOLD   = 3
+uint8 TWELITE_WAKEUPFACTOR_EVENT_WITHIN_THRESHOLD       = 4
 
 ####################################################
 # Data
@@ -60,6 +76,10 @@ std_msgs/UInt32         version
 std_msgs/UInt32         pal
 std_msgs/UInt8          sensor
 
+std_msgs/UInt8          packet_id
+std_msgs/UInt8          wakeup_factor
+std_msgs/UInt8          wakeup_event
+
 std_msgs/Float32        lqi
 
 std_msgs/UInt64         event_id
@@ -68,4 +88,4 @@ std_msgs/UInt32         power
 std_msgs/UInt32         adc
 
 std_msgs/UInt32         accel_sampling
-geometry_msgs/Accel     accel
+geometry_msgs/Vector3   accel

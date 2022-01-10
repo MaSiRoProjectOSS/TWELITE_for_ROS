@@ -30,6 +30,7 @@
 
 TWELITE_app_cue::TWELITE_app_cue() : Node("TWELITE_app_cue")
 {
+    this->monitor.set_device_name(TWELITE::app_cue::CONFIG_TWELITE_APP_DEVICE_NAME);
     this->publisher = this->create_publisher<twelite_interfaces::msg::TweliteAppCueMsg>(TWELITE::app_cue::CONFIG_TWELITE_APP_CUE_TOPIC_NAME,
                                                                                         rclcpp::QoS(TWELITE::app_cue::CONFIG_TWELITE_APP_CUE_QOS));
     this->timer     = this->create_wall_timer(this->tp_msec, std::bind(&TWELITE_app_cue::timer_callback, this));
@@ -44,7 +45,9 @@ void TWELITE_app_cue::timer_callback()
         if (true == this->monitor.device_read(&outdata, &one_sentence)) {
             if (true == one_sentence) {
                 twelite_interfaces::msg::TweliteAppCueMsg msg = this->appcue.Convert(outdata.c_str(), outdata.size());
-                this->publisher->publish(this->appcue.Convert(outdata.c_str(), outdata.size()));
+                if (0 != msg.logical_id.data) {
+                    this->publisher->publish(msg);
+                }
                 debug_printf("%s() : received [%ld][%s]\n", __func__, outdata.size(), outdata.c_str());
             }
         }
