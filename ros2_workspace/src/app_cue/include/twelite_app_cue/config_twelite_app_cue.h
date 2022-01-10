@@ -16,6 +16,7 @@ namespace TWELITE
 {
 namespace app_cue
 {
+const std::string CONFIG_TWELITE_APP_DEVICE_NAME    = "/dev/ttyUSB0";
 const std::string CONFIG_TWELITE_APP_CUE_TOPIC_NAME = "/MonoWireless/TWELITE/app_cue";
 const int CONFIG_TWELITE_APP_CUE_QOS                = 255;
 } // namespace app_cue
